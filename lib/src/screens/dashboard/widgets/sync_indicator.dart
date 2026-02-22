@@ -1,0 +1,88 @@
+import 'package:flutter/material.dart';
+import 'package:cake_wallet/view_model/dashboard/dashboard_view_model.dart';
+import 'package:cake_wallet/palette.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:cake_wallet/entities/sync_status.dart';
+
+class SyncIndicator extends StatelessWidget {
+  SyncIndicator({@required this.dashboardViewModel});
+
+  final DashboardViewModel dashboardViewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Observer(
+      builder: (_) {
+        final syncIndicatorWidth = 237.0;
+        final status = dashboardViewModel.status;
+        final statusText = status != null ? status.title() : '';
+        final progress = status != null ? status.progress() : 0.0;
+        final indicatorOffset = progress * syncIndicatorWidth;
+        final indicatorWidth = progress < 1
+            ? indicatorOffset > 0 ? indicatorOffset : 0.0
+            : syncIndicatorWidth;
+        final indicatorColor = status is SyncedSyncStatus
+                               ? PaletteDark.brightGreen
+                               : Theme.of(context).textTheme.caption.color;
+
+        return ClipRRect(
+          borderRadius: BorderRadius.all(Radius.circular(15)),
+          child: Container(
+            height: 30,
+            width: syncIndicatorWidth,
+            color: Theme.of(context).textTheme.title.decorationColor,
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                progress <= 1
+                ? Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: indicatorWidth,
+                      height: 30,
+                      color: Theme.of(context).textTheme.title.backgroundColor,
+                    )
+                )
+                : Offstage(),
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: 24,
+                    right: 24
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        height: 4,
+                        width: 4,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: indicatorColor
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context).textTheme.title.color
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+}
